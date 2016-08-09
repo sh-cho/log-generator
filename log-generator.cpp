@@ -301,7 +301,7 @@ int main(int argc, const char *argv[])
         cout << "--- settings ---" << endl;
         cout << "시작~종료 일자:\t\t" << begin_date << " ~ " << end_date << endl;
         cout << "정상 근무 시간:\t\t" << begin_time << " ~ " << end_time << endl;
-        cout << "비정상/일반 사용자 수:\t" << num_of_normal_users << " / " << num_of_suspects << endl;
+        cout << "비정상/일반 사용자 수:\t" << num_of_suspects << " / " << num_of_normal_users << endl;
         cout << "비정상/정상로그:\t" << num_of_suspicious_logs << " / " << num_of_normal_logs << endl;
         cout << "장치 종류 갯수:\t\t" << num_of_device_types << endl;
 
@@ -462,21 +462,25 @@ CSHTime generate_time(const CSHTime& normal_begin_time, const CSHTime& normal_en
         /// 정상 시간 --> p2~p3 (time_diff)
         /// 랜덤하게 만들어낸 시간이 p1~p2인지, p3~p4인지에 따라 p2~p3 사이 시간을 추가해야 함
         //int abnormal_timestamp = rand() % ((24*60*60) - time_diff + 1);
-        uniform_int_distribution<> dis(1, (24*60*60)-time_diff+1);
-        int abnormal_timestamp = dis(gen);
-        if (abnormal_timestamp >= begin_time_seconds)
-        {
-            /// p3~p4
-            abnormal_timestamp += time_diff;
-        }
+        // uniform_int_distribution<> dis(1, (24*60*60)-time_diff+1);
+        // int abnormal_timestamp = dis(gen);
+        // if (abnormal_timestamp >= begin_time_seconds)
+        // {
+        //     /// p3~p4
+        //     abnormal_timestamp += time_diff;
+        // }
 
-        ti.hour = abnormal_timestamp/3600;
-        abnormal_timestamp %= 3600;
+        // ti.hour = abnormal_timestamp/3600;
+        // abnormal_timestamp %= 3600;
 
-        ti.min = abnormal_timestamp/60;
-        abnormal_timestamp %= 60;
+        // ti.min = abnormal_timestamp/60;
+        // abnormal_timestamp %= 60;
 
-        ti.sec = abnormal_timestamp;
+        // ti.sec = abnormal_timestamp;
+
+        ti.hour = rand() % 24;
+        ti.min = rand() % 60;
+        ti.sec = rand() % 60;
     }
 
     return ti;

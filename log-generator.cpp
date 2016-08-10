@@ -349,7 +349,7 @@ int main(int argc, const char *argv[])
         //logs.open(argv[1]);
         //char filename[100];
         //sprintf(filename, "%04d%02d%02d-%04d%02d%02d.log", begin_date.year, begin_date.month, begin_date.day, end_date.year, end_date.month, end_date.day);
-        logs.open(company_name);
+        logs.open(company_name + string(".log"));
         for (auto it=log_vec_output.begin(); it!=log_vec_output.end(); ++it)
         {
             logs << (*it) << endl;
@@ -386,7 +386,12 @@ CSHDate generate_date(const CSHDate& begin_date, const CSHDate& end_date)
             if (dt.month == end_date.month)
                 dt.day = (rand() % end_date.day) + 1;
             else
-                dt.day = rand()%30 + 1;
+            {
+                if (dt.month == 2)
+                    dt.day = rand()%28 + 1;
+                else
+                    dt.day = rand()%30 + 1;
+            }
         }
         else if (dt.year == begin_date.year)
         {
@@ -398,12 +403,20 @@ CSHDate generate_date(const CSHDate& begin_date, const CSHDate& end_date)
             if (dt.month == begin_date.month)
                 dt.day = begin_date.day + (rand() % (30 - begin_date.day + 1));
             else
-                dt.day = rand()%30 + 1;
+            { 
+                if (dt.month == 2)
+                    dt.day = rand()%28 + 1;
+                else
+                    dt.day = rand()%30 + 1;
+            }
         }
         else
         {
             dt.month = rand()%12 + 1;
-            dt.day = rand()%30 + 1;
+            if (dt.month == 2)
+                dt.day = rand()%28 + 1;
+            else
+                dt.day = rand()%30 + 1;
         }
     }
     else    /// begin_date.year == end_date.year
@@ -426,7 +439,12 @@ CSHDate generate_date(const CSHDate& begin_date, const CSHDate& end_date)
             else if (dt.month == end_date.month)
                 dt.day = (rand() % end_date.day) + 1;
             else
-                dt.day = rand()%30 + 1;
+            {
+                if (dt.month == 2)
+                    dt.day = rand()%28 + 1;
+                else
+                    dt.day = rand()%30 + 1;
+            }
         }
     }
 

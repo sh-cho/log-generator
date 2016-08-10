@@ -349,7 +349,7 @@ int main(int argc, const char *argv[])
         //logs.open(argv[1]);
         //char filename[100];
         //sprintf(filename, "%04d%02d%02d-%04d%02d%02d.log", begin_date.year, begin_date.month, begin_date.day, end_date.year, end_date.month, end_date.day);
-        logs.open(company_name);
+        logs.open(company_name.c_str());
         for (auto it=log_vec_output.begin(); it!=log_vec_output.end(); ++it)
         {
             logs << (*it) << endl;

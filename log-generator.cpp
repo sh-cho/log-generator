@@ -13,6 +13,7 @@
 ///
 /// CONFIG FILE FORMAT
 /// ------------------
+/// company_name                #회사 이름
 /// YYYY MM DD                  #로그 시작 일자
 /// YYYY MM DD                  #로그 종료 일자
 /// HH MM SS                    #정상 시작 시간 (24h)
@@ -251,6 +252,7 @@ int main(int argc, const char *argv[])
     ofstream logs;
 
     /// CONFIG VARIABLES
+    string company_name;
     CSHDate begin_date, end_date;
     CSHTime begin_time, end_time;
     vector<Device> devices;
@@ -271,6 +273,7 @@ int main(int argc, const char *argv[])
         
 
         /// LOAD CONFIG START
+        conf >> company_name;
         conf >> begin_date.year >> begin_date.month >> begin_date.day
              >> end_date.year >> end_date.month >> end_date.day;
         conf >> begin_time.hour >> begin_time.min >> begin_time.sec
@@ -344,9 +347,9 @@ int main(int argc, const char *argv[])
 
         /// PUT LOG TO FILE
         //logs.open(argv[1]);
-        char filename[100];
-        sprintf(filename, "%04d%02d%02d-%04d%02d%02d.log", begin_date.year, begin_date.month, begin_date.day, end_date.year, end_date.month, end_date.day);
-        logs.open(filename);
+        //char filename[100];
+        //sprintf(filename, "%04d%02d%02d-%04d%02d%02d.log", begin_date.year, begin_date.month, begin_date.day, end_date.year, end_date.month, end_date.day);
+        logs.open(company_name);
         for (auto it=log_vec_output.begin(); it!=log_vec_output.end(); ++it)
         {
             logs << (*it) << endl;

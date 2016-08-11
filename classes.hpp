@@ -97,6 +97,12 @@ struct CSHDate
         return (*this>dt || *this==dt);
     }
 
+    friend inline istream& operator>>(istream& in, CSHDate& dt)
+    {
+        in >> dt.year >> dt.month >> dt.day;
+        return in;
+    }
+
     friend inline ostream& operator<<(ostream& os, const CSHDate& dt)
     {
         os << dt.year << "-"
@@ -139,6 +145,11 @@ struct CSHTime
         return (*this>ti || *this==ti);
     }
 
+    friend inline istream& operator>>(istream& in, CSHTime& ti)
+    {
+        in >> ti.hour >> ti.min >> ti.sec;
+        return in;
+    }
     friend inline ostream& operator<<(ostream& os, const CSHTime& ti)
     {
         os << setw(2) << setfill('0') << ti.hour << ":"
@@ -222,10 +233,8 @@ struct Option
     friend inline istream& operator>>(istream& in, Option& op)
     {
         in >> op.company_name;
-        in >> op.begin_date.year >> op.begin_date.month >> op.begin_date.day
-            >> op.end_date.year >> op.end_date.month >> op.end_date.day;
-        in >> op.begin_time.hour >> op.begin_time.min >> op.begin_time.sec
-            >> op.end_time.hour >> op.end_time.min >> op.end_time.sec;
+        in >> op.begin_date >> op.end_date;
+        in >> op.begin_time >> op.end_time;
         in >> op.num_of_normal_users >> op.num_of_suspects
             >> op.num_of_device_types;
 

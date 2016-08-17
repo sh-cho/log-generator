@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _CLASSES_HPP_
+#define _CLASSES_HPP_
+
 
 ///
 /// LOG GENERATOR PROGRAM.
@@ -15,36 +17,33 @@
 ///
 /// CONFIG FILE FORMAT
 /// ------------------
-/// company_name                #회사 이름
-/// YYYY MM DD                  #로그 시작 일자
-/// YYYY MM DD                  #로그 종료 일자
-/// HH MM SS                    #정상 시작 시간 (24h)
-/// HH MM SS                    #정상 종료 시간       --> 정상 시작 시간 < 정상 종료 시간 이어야함
-/// num_of_normal_users         #일반 사용자 수(IP 개수)
-/// num_of_suspects             #비정상적인 이용을 하는 사용자 수
-/// num_of_device_types         #device 종류 개수
-/// [device1, 30, 50, 10000000] #device 이름, 개수, 사용량 최소값, 최대값(정상범주, byte)
-/// [device2, 10, 10, 100]
+/// company_name                            #회사 이름
+/// YYYY MM DD                              #로그 시작 일자
+/// YYYY MM DD                              #로그 종료 일자
+/// HH MM SS                                #정상 시작 시간 (24h)
+/// HH MM SS                                #정상 종료 시간       --> 정상 시작 시간 < 정상 종료 시간 이어야함
+/// num_of_normal_users                     #일반 사용자 수(IP 개수)
+/// num_of_suspects                         #비정상적인 이용을 하는 사용자 수
+/// num_of_device_types                     #device 종류 개수
+/// [device1, 30, 3, READ, WRITE, DELETE]   #device 이름, 개수, method 개수, method1, 2, ...
+/// [device2, 10, 2, SEND, RECEIVE]
 /// ...
-/// num_of_normal_logs          #정상로그의 수
-/// num_of_suspicious_logs      #이상로그의 수
+/// num_of_normal_logs                      #정상로그의 수
+/// num_of_suspicious_logs                  #이상로그의 수
 ///
 
 ///
 /// LOG FORMAT
 /// ----------
-/// filename: YYYYMMDD-YYYYMMDD.log
-///           from     to date
+/// filename: company-name.log
 /// 
 /// file content:
-/// [TIMESTAMP] [IP] [device_name] [usage] [(C|R|U|D)]
+/// [TIMESTAMP] [IP] [device_name] [method]
 ///
 /// ex)
-/// [2016-08-04/23:09:13] [58.62.1.77] [printer1] [300] [c]
-/// [2016-08-04/23:11:24] [58.62.1.77] [usb1] [1000000] [d]
+/// [2016-08-04/23:09:13] [58.62.1.77] [mail3] [SEND]
+/// [2016-08-04/23:11:24] [58.62.1.77] [usb1] [WRITE]
 /// ...
-///
-/// (C|R|U|D) mean software's default operation; Create, Read, Update, Delete.
 ///
 
 #include <algorithm>
@@ -60,8 +59,6 @@
 #include <vector>
 using namespace std;
 
-/// TYPEDEF
-typedef unsigned long long ULL;
 
 /// STRUCT DEFINITIONS
 struct CSHDate
@@ -171,11 +168,8 @@ struct CSHLog
     //DEVICE NAME
     string device_name;
 
-    //usage
-    ULL usage;
-
     //method
-    char method;
+    string method;
 
     bool operator<(const CSHLog& lg) const
     {
@@ -194,11 +188,10 @@ struct CSHLog
 
     friend inline ostream& operator<<(ostream& os, const CSHLog& lg)
     {
-        //FORMAT : [2016-08-04/23:09:13] [58.62.1.77] [printer1] [300] [c]
+        //FORMAT : [2016-08-04/23:09:13] [58.62.1.77] [printer1] [PRINT]
         os << "[" << lg.timestamp_date << "/" << lg.timestamp_time << "]"
            << " [" << lg.ip << "]"
            << " [" << lg.device_name << "]"
-           << " [" << lg.usage << "]"
            << " [" << lg.method << "]";
         return os;
     }
@@ -207,14 +200,8 @@ struct CSHLog
 struct Device
 {
     string name;
-    ULL min_usage;
-    ULL max_usage;
-    inline void assign(string _name, ULL _minu, ULL _maxu)
-    {
-        name = _name;
-        min_usage = _minu;
-        max_usage = _maxu;
-    }
+    int size;    // DEVICE 개수
+    vector<string> methods;
 };
 
 struct Option
@@ -226,33 +213,36 @@ struct Option
         num_of_suspicious_logs;
     int num_of_normal_users,
         num_of_suspects;
-    int num_of_device_types;
+    vector<string> device_methods;
     vector<Device> devices;
-    vector<char> methods;
 
     friend inline istream& operator>>(istream& in, Option& op)
     {
+        int num_of_devices;
+
         in >> op.company_name;
         in >> op.begin_date >> op.end_date;
         in >> op.begin_time >> op.end_time;
         in >> op.num_of_normal_users >> op.num_of_suspects
-            >> op.num_of_device_types;
+            >> num_of_devices;
 
         string device_name;
-        int num_of_devices;
+        string method_name;
+        int num_of_device_methods;
         Device dev;
-        for (int i=0; i<op.num_of_device_types; ++i)
+        for (int i=0; i<num_of_devices; ++i)
         {
-            in >> device_name >> num_of_devices >> dev.min_usage >> dev.max_usage;
-            for (int j=0; j<num_of_devices; ++j)
+            in >> dev.name >> dev.size >> num_of_device_methods;
+            for (int j=0; j<num_of_device_methods; ++j)
             {
-                dev.name = device_name + to_string(j+1);
-                op.devices.push_back(dev);
+                in >> method_name;
+                dev.methods.push_back(method_name);
             }
+
+            op.devices.push_back(dev);
         }
 
         in >> op.num_of_normal_logs >> op.num_of_suspicious_logs;
-        op.methods = {'C', 'R', 'U', 'D'};
         return in;
     }
 
@@ -263,7 +253,7 @@ struct Option
         os << "정상 근무 시간:\t\t" << op.begin_time << " ~ " << op.end_time << endl;
         os << "비정상/일반 사용자 수:\t" << op.num_of_suspects << " / " << op.num_of_normal_users << endl;
         os << "비정상/정상로그:\t" << op.num_of_suspicious_logs << " / " << op.num_of_normal_logs << endl;
-        os << "장치 종류 갯수:\t\t" << op.num_of_device_types;
+        os << "장치 종류 갯수:\t\t" << op.devices.size();
 
         return os;
     }
@@ -439,9 +429,30 @@ CSHTime LogGenerator::generate_time(bool is_normal, mt19937& gen)
     }
     else
     {
-        ti.hour = rand() % 24;
-        ti.min = rand() % 60;
-        ti.sec = rand() % 60;
+        /// ----------------
+        /// |     ||||||   |
+        /// ----------------
+        /// ^     ^    ^   ^
+        /// p1    p2   p3  p4
+        ///
+        /// 정상 시간 --> p2~p3 (time_diff)
+        /// 랜덤하게 만들어낸 시간이 p1~p2인지, p3~p4인지에 따라 p2~p3 사이 시간을 추가해야 함
+        //int abnormal_timestamp = rand() % ((24*60*60) - time_diff + 1);
+        uniform_int_distribution<> dis(1, (24*60*60)-time_diff+1);
+        int abnormal_timestamp = dis(gen);
+        if (abnormal_timestamp >= begin_time_seconds)
+        {
+            /// p3~p4
+            abnormal_timestamp += time_diff;
+        }
+
+        ti.hour = abnormal_timestamp/3600;
+        abnormal_timestamp %= 3600;
+
+        ti.min = abnormal_timestamp/60;
+        abnormal_timestamp %= 60;
+
+        ti.sec = abnormal_timestamp;
     }
 
     return ti;
@@ -458,15 +469,9 @@ CSHLog LogGenerator::generate_log(bool is_normal, mt19937& gen)
         lg.ip = suspect_ips[ rand()%suspect_ips.size() ];
 
 
-    Device dev = option.devices[ rand()%option.devices.size() ];
-    lg.device_name = dev.name;
-    uniform_int_distribution<ULL> dis(dev.min_usage, dev.max_usage);
-    if (is_normal)
-        lg.usage = dis(gen);
-    else
-        lg.usage = dev.max_usage*2 + dis(gen) * (rand()%10 + 1); //max*2 + rand의 1~10배
-
-    lg.method = option.methods[ rand()%option.methods.size() ];
+    Device dev = option.devices[ rand() % option.devices.size() ];
+    lg.device_name = dev.name + to_string(rand() % dev.size + 1);
+    lg.method = dev.methods[ rand() % dev.methods.size() ];
     return lg;
 }
 
@@ -487,3 +492,5 @@ void LogGenerator::put(ostream& os)
     for (auto&& _log : logs)
         os << _log << endl;
 }
+
+#endif

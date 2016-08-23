@@ -3,6 +3,9 @@ language: cpp
 compiler:
   - g++
 
+before_install:
+  - sudo apt-get update -qq
+
 install:
   - sudo apt-get install -qq g++-4.8
 

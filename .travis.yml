@@ -1,4 +1,3 @@
 language: cpp
 compiler:
 - g++
-script: "bash -c ./build.sh"

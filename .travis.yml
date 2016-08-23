@@ -1,4 +1,9 @@
 language: cpp
+
 compiler:
-- g++
+  - g++
+
+install:
+  - sudo apt-get install -qq g++-4.8
+
 script: make
